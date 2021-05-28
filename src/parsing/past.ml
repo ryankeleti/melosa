@@ -22,6 +22,7 @@ and bind = bind' spanned
 and bind' = { bind_pat : pat; bound : exp }
 and rule = rule' spanned
 and rule' = { rule_pat : pat; action : exp }
+
 and pat = pat' spanned
 and pat' =
   | Ppat_any
@@ -31,6 +32,7 @@ and pat' =
   | Ppat_tuple of pat list
   | Ppat_cons of string * pat option
   | Ppat_or of pat * pat
+
 and ty = ty' spanned
 and ty' =
   | Pty_any
@@ -38,9 +40,11 @@ and ty' =
   | Pty_arrow of ty * ty
   | Pty_tuple of ty list
   | Pty_cons of id * ty option
+
 and const =
   | Pconst_int of string
   | Pconst_bool of bool
+
 and mexp = mexp' spanned
 and mexp' =
   | Pmexp_id of id
@@ -49,11 +53,13 @@ and mexp' =
   | Pmexp_app of mexp * mexp
   | Pmexp_func of func_param * mexp
 and func_param = { param_id : string; param_ty : mty }
+
 and mty = mty' spanned
 and mty' =
   | Pmty_id of id
   | Pmty_sig of signature
   | Pmty_func of func_param * mty
+
 and ty_decl = ty_info list
 and ty_info = ty_info' spanned
 and ty_info' = { ty_id : string; kind : ty_kind option; params : ty list option }
@@ -61,8 +67,19 @@ and ty_kind =
   | Pkind_variant of ty_cons list
 and ty_cons = ty_cons' spanned
 and ty_cons' = { cons_id : string; cons_args : ty list option }
+
 and mty_decl = mty_decl' spanned
 and mty_decl' = { mty_id : string; mtype : mty option }
+
+and signature = signature_item list
+and signature_item = signature_item' spanned
+and signature_item' =
+  | Psig_val of string * ty
+  | Psig_type of ty_decl
+  | Psig_modtype of mty_decl
+  | Psig_open of id
+  | Psig_mod of string * mty
+
 and structure = structure_item list
 and structure_item = structure_item' spanned
 and structure_item' =
@@ -73,13 +90,5 @@ and structure_item' =
   | Pstr_exp of exp
   | Pstr_open of id
   | Pstr_mod of string * mexp
-and signature = signature_item list
-and signature_item = signature_item' spanned
-and signature_item' =
-  | Psig_val of string * ty
-  | Psig_type of ty_decl
-  | Psig_modtype of mty_decl
-  | Psig_open of id
-  | Psig_mod of string * mty
 [@@deriving show { with_path = false }]
 

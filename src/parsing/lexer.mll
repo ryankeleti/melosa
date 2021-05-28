@@ -48,26 +48,26 @@ let iop2 = ['+' '-'] sym*
 let iop3 = ['*' '/'] sym*
 
 rule token = parse
-  | ws        { token lexbuf }
-  | nl        { Lexing.new_line lexbuf; token lexbuf }
-  | "--"      { line_comment lexbuf }
-  | "_"       { UNDERSCORE }
-  | "("       { LPAREN }
-  | ")"       { RPAREN }
-  | ","       { COMMA }
-  | ":"       { COLON }
-  | "."       { DOT }
-  | ";"       { SEMI }
-  | "*"       { STAR }
-  | "'"       { QUOTE }
-  | "="       { EQUAL }
-  | "->"      { RARROW }
-  | "|"       { PIPE }
-  | "+"       { PLUS }
-  | "-"       { MINUS }
-  | lid as id { match Hashtbl.find keywords id with
-                | Some kw -> kw
-                | None -> LID id }
+  | ws         { token lexbuf }
+  | nl         { Lexing.new_line lexbuf; token lexbuf }
+  | "--"       { line_comment lexbuf }
+  | "_"        { UNDERSCORE }
+  | "("        { LPAREN }
+  | ")"        { RPAREN }
+  | ","        { COMMA }
+  | ":"        { COLON }
+  | "."        { DOT }
+  | ";"        { SEMI }
+  | "*"        { STAR }
+  | "'"        { QUOTE }
+  | "="        { EQUAL }
+  | "->"       { RARROW }
+  | "|"        { PIPE }
+  | "+"        { PLUS }
+  | "-"        { MINUS }
+  | lid as id  { match Hashtbl.find keywords id with
+                 | Some kw -> kw
+                 | None -> LID id }
   | uid as id  { UID id }
   | pop as op  { POP op }
   | iop0 as op { IOP0 op }
@@ -82,5 +82,4 @@ and line_comment = parse
   | nl  { Lexing.new_line lexbuf; token lexbuf } 
   | eof { EOF }
   | _   { line_comment lexbuf }
-
 

@@ -326,6 +326,20 @@ let mty_def :=
   | MOD; TYPE; mty_id = UID; mtype = preceded(EQUAL, mty)?;
      { span { mty_id; mtype } $loc }
 
+let signature_item :=
+  | VAL; id = LID; COLON; t = ty;
+     { span (Psig_val (id, t)) $loc }
+  | TYPE; td = rec_ty_def;
+     { span (Psig_type td) $loc }
+  | MOD; id = UID; COLON; mt = mty;
+     { span (Psig_mod (id, mt)) $loc }
+  | OPEN; id = mod_lid;
+     { span (Psig_open id) $loc }
+ 
+let signature :=
+  | s = list(signature_item);
+     { s }
+
 let structure_item :=
   | LET; ~ = binds;
      { span (Pstr_let binds) $loc }
@@ -348,19 +362,5 @@ let structure :=
 
 let structure_eof :=
   | s = structure; EOF; 
-     { s }
-
-let signature_item :=
-  | VAL; id = LID; COLON; t = ty;
-     { span (Psig_val (id, t)) $loc }
-  | TYPE; td = rec_ty_def;
-     { span (Psig_type td) $loc }
-  | MOD; id = UID; COLON; mt = mty;
-     { span (Psig_mod (id, mt)) $loc }
-  | OPEN; id = mod_lid;
-     { span (Psig_open id) $loc }
- 
-let signature :=
-  | s = list(signature_item);
      { s }
 
