@@ -1,0 +1,10 @@
+(ocamllex lexer)
+(menhir
+  (modules parser)
+  (flags --table))
+
+(library
+  (name melosa_parsing)
+  (libraries base fmt menhirLib)
+  (preprocess (pps ppx_deriving.show)))
+

@@ -1,0 +1,5 @@
+(library
+  (name melosa_typing)
+  (libraries base fmt)
+  (preprocess (pps ppx_deriving.show)))
+
