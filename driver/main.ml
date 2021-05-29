@@ -21,7 +21,7 @@ let source =
 let cmd =
   let doc = "melosa compiler" in
   Term.(const read $ source),
-  Term.(info "melosa" ~version:"v0.0.1" ~doc ~exits:default_exits)
+  Term.(info "melosa" ~doc ~exits:default_exits)
 
 let () =
   Term.(exit @@ eval cmd)

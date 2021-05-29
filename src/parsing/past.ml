@@ -66,7 +66,7 @@ and ty_info' = { ty_id : string; kind : ty_kind option; params : ty list option 
 and ty_kind =
   | Pkind_variant of ty_cons list
 and ty_cons = ty_cons' spanned
-and ty_cons' = { cons_id : string; cons_args : ty list option }
+and ty_cons' = { cons_id : string; cons_arg : ty option }
 
 and mty_decl = mty_decl' spanned
 and mty_decl' = { mty_id : string; mtype : mty option }

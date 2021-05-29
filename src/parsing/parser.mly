@@ -66,6 +66,13 @@
 
 %%
 
+let separated_list2(sep, X) :=
+  | x1 = X; sep; x2 = X;
+     { [x1; x2] }
+  | x = X; sep; xs = separated_list2(sep, X);
+     { x :: xs }
+
+
 let lid(dot, id) :=
   | ~ = id;
      { Lid.Id id }
@@ -96,7 +103,7 @@ let exp :=
      { span (Pexp_let (binds, e)) $loc }
   | LET; REC; ~ = binds; IN; e = exp;
      { span (Pexp_let_rec (binds, e)) $loc }
-  | IF; c = exp_comma; THEN; t = exp; ELSE; e = exp;
+  | IF; c = exp; THEN; t = exp; ELSE; e = exp;
      { span (Pexp_if (c, t, e)) $loc }
   | e1 = exp; SEMI; e2 = exp;
      { span (Pexp_seq (e1, e2)) $loc }
@@ -104,13 +111,13 @@ let exp :=
      { e }
 
 let exp_comma :=
-  | e = exp_binop; COMMA; es = separated_list(COMMA, exp_binop);
-     { span (Pexp_tuple (e :: es)) $loc }
-  | e = exp_binop;
+  | es = separated_list2(COMMA, exp_infixop);
+     { span (Pexp_tuple es) $loc }
+  | e = exp_infixop;
      { e }
 
-let exp_binop :=
-  | e1 = exp_binop; op = binop; e2 = exp_binop;
+let exp_infixop :=
+  | e1 = exp_infixop; op = infixop; e2 = exp_infixop;
      { span (Pexp_app (op, [e1; e2])) $loc }
   | e = exp_app;
      { e }
@@ -118,8 +125,6 @@ let exp_binop :=
 let exp_app :=
   | f = exp_prefix; args = nonempty_list(exp_prefix);
      { span (Pexp_app (f, args)) $loc }
-//  | e1 = exp; op = infixop; e2 = exp;
-//     {{ pexp = Pexp_app (op, [e1; e2]); pexp_span = span $loc }}
   | e = exp_prefix;
      { e }
 
@@ -128,10 +133,6 @@ let exp_prefix :=
      { span (Pexp_app (op, [e])) $loc }
   | e = exp_simple;
      { e }
-
-let prefixop :=
-  | op = POP;
-     { span (Pexp_id (Lid.Id op)) $loc }
 
 let exp_simple :=
   | id = val_lid;
@@ -151,23 +152,15 @@ let exp_simple :=
   | BEGIN; e = exp; RPAREN;
      { e }
 
-let const :=
-  | i = INT;
-     { Pconst_int i }
-  | TRUE;
-     { Pconst_bool true }
-  | FALSE;
-     { Pconst_bool false }
-
 let val_id :=
   | id = LID;
      { id }
   | op = POP;
      { op }
-  | op = binop_id;
+  | op = infixop_id;
      { op }
 
-let binop_id ==
+let infixop_id ==
   | op = IOP0;
      { op }
   | op = IOP1;
@@ -185,25 +178,35 @@ let binop_id ==
   | EQUAL;
      { "=" }
 
-let binop ==
-  | op = binop_id;
+let infixop ==
+  | op = infixop_id;
      { span (Pexp_id (Lid.Id op)) $loc }
 
+let prefixop ==
+  | op = POP;
+     { span (Pexp_id (Lid.Id op)) $loc }
+
+let const :=
+  | i = INT;
+     { Pconst_int i }
+  | TRUE;
+     { Pconst_bool true }
+  | FALSE;
+     { Pconst_bool false }
+
 let bind :=
-  | ~ = pat; EQUAL; bound = exp;
-     { span { bind_pat = pat; bound } $loc }
+  | bind_pat = pat; EQUAL; bound = exp;
+     { span { bind_pat; bound } $loc }
 
 let binds :=
-  | bs = separated_nonempty_list(AND, bind);
-     { bs }
+  separated_nonempty_list(AND, bind)
 
 let rule :=
-  | ~ = pat; RARROW; action = exp;
-     { span { rule_pat = pat; action } $loc }
+  | rule_pat = pat; RARROW; action = exp;
+     { span { rule_pat; action } $loc }
 
 let rules :=
-  | rs = separated_nonempty_list(PIPE, rule);
-     { rs }
+  separated_nonempty_list(PIPE, rule)
 
 let pat :=
   | p = pat_comma;
@@ -238,32 +241,28 @@ let pat_simple :=
      { p }
 
 let ty :=
-  | UNDERSCORE;
-     { span Pty_any $loc }
-  | QUOTE; id = LID;
-     { span (Pty_var id) $loc }
   | t1 = ty; RARROW; t2 = ty;
      { span (Pty_arrow (t1, t2)) $loc }
-  | LPAREN; ts = tys; RPAREN;
+  | t = ty_star;
+     { t }
+
+let ty_star :=
+  | ts = separated_list2(STAR, ty_simple);
      { span (Pty_tuple ts) $loc }
+  | t = ty_simple;
+     { t }
+
+let ty_simple :=
+  | UNDERSCORE;
+     { span Pty_any $loc }
+  | LPAREN; t = ty; RPAREN;
+     { t }
+  | QUOTE; id = LID;
+     { span (Pty_var id) $loc }
   | t = ty; id = ty_cons_lid;
      { span (Pty_cons (id, Some t)) $loc }
   | id = ty_cons_lid;
      { span (Pty_cons (id, None)) $loc }
-
-let tys :=
-  | ts = separated_nonempty_list(COMMA, ty);
-     { ts }
-
-let star_tys :=
-  | ts = separated_nonempty_list(STAR, ty);
-     { ts }
-
-let ty_cons :=
-  | cons_id = UID;
-     { span { cons_id; cons_args = None } $loc }
-  | cons_id = UID; OF; ts = star_tys;
-     { span { cons_id; cons_args = Some ts } $loc }
 
 let ty_def :=
   | TYPE; params = ty_params?; ty_id = LID; kind = preceded(EQUAL, ty_kind)?;
@@ -284,8 +283,14 @@ let ty_kind :=
      { ty_variant }
 
 let ty_variant :=
-  | PIPE?; variants = separated_nonempty_list(PIPE, ty_cons);
+  | PIPE?; variants = separated_nonempty_list(PIPE, ty_cons_def);
      { (Pkind_variant variants) }
+
+let ty_cons_def :=
+  | cons_id = UID;
+     { span { cons_id; cons_arg = None } $loc }
+  | cons_id = UID; OF; t = ty;
+     { span { cons_id; cons_arg = Some t } $loc }
 
 let rec_ty_def :=
   separated_nonempty_list(AND, ty_def)
