@@ -1,7 +1,8 @@
 open Span
+open Sexplib.Std
 
 type id = Lid.t
-[@@deriving show]
+[@@deriving sexp_of, show]
 
 type exp = exp' spanned
 and exp' =
@@ -90,5 +91,5 @@ and structure_item' =
   | Pstr_exp of exp
   | Pstr_open of id
   | Pstr_mod of string * mexp
-[@@deriving show { with_path = false }]
+[@@deriving sexp_of, show { with_path = false }]
 
