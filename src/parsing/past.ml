@@ -27,10 +27,10 @@ and pat = pat' spanned
 and pat' =
   | Ppat_any
   | Ppat_unit
-  | Ppat_var of string
+  | Ppat_var of id
   | Ppat_const of const
   | Ppat_tuple of pat list
-  | Ppat_cons of string * pat option
+  | Ppat_cons of id * pat option
   | Ppat_or of pat * pat
 
 and ty = ty' spanned

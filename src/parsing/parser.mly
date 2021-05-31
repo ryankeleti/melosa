@@ -96,10 +96,29 @@ let cons_lid :=
   lid(mod_lid, UID)
 
 let val_lid :=
-  lid(mod_lid, LID)
+  lid(mod_lid, val_id)
 
 let ty_cons_lid :=
   lid(mod_lid, LID)
+
+let val_id ==
+  | LID
+  | delimited(LPAREN, POP, RPAREN)
+  | delimited(LPAREN, infixop, RPAREN)
+
+let infixop ==
+  | IOP0
+  | IOP1
+  | IOP2
+  | IOP3
+  | PLUS;
+     { "+" }
+  | MINUS;
+     { "-" }
+  | STAR;
+     { "*" }
+  | EQUAL;
+     { "=" }
 
 let exp_seq :=
   | exp
@@ -146,20 +165,6 @@ let exp_simple :=
   | LPAREN; RPAREN;
      { span Pexp_unit $loc }
 
-let infixop ==
-  | IOP0
-  | IOP1
-  | IOP2
-  | IOP3
-  | PLUS;
-     { "+" }
-  | MINUS;
-     { "-" }
-  | STAR;
-     { "*" }
-  | EQUAL;
-     { "=" }
-
 let const ==
   | i = INT;
      { Pconst_int i }
@@ -194,14 +199,14 @@ let pat_comma :=
      }
 
 let pat_cons ==
-  | id = UID; p = pat_simple;
+  | id = cons_lid; p = pat_simple;
      { span (Ppat_cons (id, Some p)) $loc }
   | pat_simple
 
 let pat_simple :=
-  | id = LID;
+  | id = val_lid;
      { span (Ppat_var id) $loc }
-  | id = UID;
+  | id = cons_lid;
      { span (Ppat_cons (id, None)) $loc }
   | c = const;
      { span (Ppat_const c) $loc }
@@ -296,7 +301,7 @@ let mty_def :=
 
 let signature_item := spanned(_signature_item)
 let _signature_item :=
-  | VAL; (id, t) = separated_pair(LID, COLON, ty);
+  | VAL; (id, t) = separated_pair(val_id, COLON, ty);
      { Psig_val (id, t) }
   | td = preceded(TYPE, rec_ty_def);
      { Psig_type td }
