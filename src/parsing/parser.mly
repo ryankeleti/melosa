@@ -1,7 +1,7 @@
 %{
   open Past
 
-  let span it (s, e) = Span.{ it; span = Range (s, e) }
+  let span it (s, e) = Past.{ it; span = Range (s, e) }
 %}
 
 %token AND           "and"
@@ -238,8 +238,10 @@ let ty_simple :=
      { span (Pty_cons (id, None)) $loc }
 
 let ty_def :=
-  | TYPE; params = ty_params?; ty_id = LID; kind = preceded(EQUAL, ty_kind)?;
+  | TYPE; params = ty_params?; ty_id = LID; kind = preceded(EQUAL, ty_kind);
      { span { ty_id; kind; params } $loc }
+  | TYPE; params = ty_params?; ty_id = LID;
+     { span { ty_id; kind = Pkind_abstract; params } $loc }
 
 let ty_param :=
   | id = preceded(QUOTE, LID);
@@ -315,10 +317,10 @@ let signature :=
 
 let structure_item := spanned(_structure_item)
 let _structure_item :=
-  | LET; ~ = binds;
-     { Pstr_let binds }
-  | LET; REC; ~ = binds;
-     { Pstr_let_rec binds }
+  | VAL; ~ = binds;
+     { Pstr_val binds }
+  | VAL; REC; ~ = binds;
+     { Pstr_val_rec binds }
   | td = rec_ty_def;
      { Pstr_type td }
   | MOD; (id, me) = pair(UID, preceded(EQUAL, mexp));

@@ -5,6 +5,11 @@
 
 (library
   (name melosa_parsing)
-  (libraries base fmt menhirLib sexplib)
+  (libraries
+    base
+    fmt
+    menhirLib
+    sexplib
+    melosa_common)
   (preprocess (pps ppx_deriving.show ppx_sexp_conv)))
 

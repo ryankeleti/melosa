@@ -1,8 +1,7 @@
 (library
   (name melosa)
   (libraries
-    base
+    melosa_common
     melosa_parsing
     melosa_typing))
-
 

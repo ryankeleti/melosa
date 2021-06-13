@@ -1,9 +1,10 @@
 (library
-  (name melosa_typing)
+  (name melosa_common)
+  (wrapped false)
   (libraries
     base
     fmt
-    sexplib
-    melosa_common)
+    sexplib)
   (preprocess (pps ppx_deriving.show ppx_sexp_conv)))
+
 

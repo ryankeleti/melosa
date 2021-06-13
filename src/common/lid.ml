@@ -4,16 +4,16 @@ type t =
   | Id of string
   | Dot of t * string
 
-let list id =
+let list =
   let rec help acc = function
-    | Id s -> s :: acc
-    | Dot (id, s) -> help (s :: acc) id in
-  help [] id
+    | Id x -> x :: acc
+    | Dot (id, x) -> help (x :: acc) id in
+  help []
 
 let pp f =
   let rec help f = function
-    | Id s -> Fmt.string f s
-    | Dot (id, s) -> Fmt.pf f "%a.%s" help id s in
+    | Id x -> Fmt.string f x
+    | Dot (id, x) -> Fmt.pf f "%a.%s" help id x in
   Fmt.quote help f
 
 let sexp_of_t id =
